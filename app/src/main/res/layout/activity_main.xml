@@ -4,18 +4,13 @@
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.workstasion.myapplication.MainActivity">
-
-    <Button
-        android:id="@+id/go"
-        android:background="@android:color/white"
-        android:textColor="@android:color/black"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+    tools:context="com.example.workstasion.myapplication.Activities.MainActivity">
 
     <GridView
         android:id="@+id/gridView"
+        android:background="@android:color/white"
         android:numColumns="2"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"></GridView>
+        android:layout_height="match_parent" />
+
 </RelativeLayout>

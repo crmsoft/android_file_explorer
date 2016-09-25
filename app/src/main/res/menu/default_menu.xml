@@ -1,0 +1,10 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:myapplication="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/logout"
+        android:title="test"
+        android:orderInCategory="10"
+        myapplication:showAsAction="always"
+        android:icon="@android:drawable/ic_lock_power_off" />
+
+</menu>

@@ -1,4 +1,4 @@
-package com.example.workstasion.myapplication;
+package com.example.workstasion.myapplication.Views;
 
 import android.content.Context;
 import android.util.AttributeSet;
