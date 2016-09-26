@@ -1,0 +1,10 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:myapplication="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/item_count"
+        android:title="Delete" />
+
+    <item android:id="@+id/item_send"
+        android:title="Send" />
+
+</menu>

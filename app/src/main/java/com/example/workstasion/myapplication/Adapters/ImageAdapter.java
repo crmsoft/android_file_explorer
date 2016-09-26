@@ -61,8 +61,14 @@ public class ImageAdapter extends ArrayAdapter<ImageScanner.FoldStruct> {
             viewHolder = (ViewHolder)convertView.getTag();
         }
 
+
         String curr = item.get(0).fullPath[position];
         bitmapLoader.loadBitmap(curr,viewHolder.imageView);
+        if(item.get(0).selectedIndexes.contains(position)){
+            viewHolder.checkbox.setVisibility(View.VISIBLE);
+        }else{
+            viewHolder.checkbox.setVisibility(View.GONE);
+        }
 
         return convertView;
     }

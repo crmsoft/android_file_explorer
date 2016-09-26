@@ -35,6 +35,7 @@ public class ImageScanner {
         public String folder;
         public String[] fullPath;
         public String[] filename;
+        public List<Integer> selectedIndexes = new ArrayList<>();
         public int counter = 0;
     }
 
