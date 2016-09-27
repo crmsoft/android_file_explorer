@@ -1,6 +1,8 @@
 package com.example.workstasion.myapplication.Workers;
 
 import android.media.Image;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
 
@@ -64,19 +66,40 @@ public class ImageScanner {
 
     public void load(){
         folding = new ArrayList<>();
-        process();
+        LoadInBack loadInBack = new LoadInBack();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            loadInBack.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        } else {
+            loadInBack.execute();
+        }
     }
 
     private void process(){
+
         new Thread(new Runnable() {
             @Override
             public void run() {
-                if(startPath != null)
-                    deep(startPath,"root");
 
                 ImageScanner.this.scannerEvents.loadDone();
             }
         }).run();
+    }
+
+    private class LoadInBack extends AsyncTask<Void,Void,Void>{
+
+        @Override
+        protected Void doInBackground(Void... params) {
+
+            if(startPath != null)
+                deep(startPath,"root");
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            ImageScanner.this.scannerEvents.loadDone();
+        }
     }
 
     private void deep(File p, String parent ){

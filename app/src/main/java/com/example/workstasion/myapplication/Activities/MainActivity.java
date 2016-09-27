@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
+import android.widget.ProgressBar;
 
 import com.example.workstasion.myapplication.Adapters.FolderAdapter;
 import com.example.workstasion.myapplication.Adapters.ImageAdapter;
@@ -41,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private MenuItem selectedItemCount;
     private MenuItem checkboxItem;
     private boolean isCheckEnabled = true;
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         mAdapter = new FolderAdapter(this,folding);
         mAdapterDetailed = new ImageAdapter(this,selectedFolder);
+        progressBar = (ProgressBar)findViewById(R.id.load_indicator);
 
         ActivityCompat.requestPermissions(MainActivity.this,
                 new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
@@ -74,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     @Override
                     public void run() {
                         ((BaseAdapter)mGridView.getAdapter()).notifyDataSetChanged();
+                        progressBar.setVisibility(View.GONE);
                     }
                 });
             }
@@ -157,7 +161,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                         selectedItemCount.setVisible(true);
                     }else {
                         checkbox.setVisibility(View.GONE);
-                        f.selectedIndexes.remove(position);
+                        f.selectedIndexes.remove(Integer.valueOf(position));
                         if(f.selectedIndexes.size() == 0){
                             selectedItemCount.setVisible(false);
                         }else{

@@ -1,22 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_image_slider"
-    android:layout_width="match_parent"
-    android:background="@android:color/black"
-    android:layout_height="match_parent"
-    tools:context="com.example.workstasion.myapplication.Activities.ImageSlider">
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <ImageView
-        app:srcCompat="@drawable/placeholder"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:adjustViewBounds="true"
-        android:scaleType="fitCenter"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:id="@+id/target" />
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
+        <uk.co.senab.photoview.PhotoView
+            android:id="@+id/target"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
-</RelativeLayout>
+    </FrameLayout>
+
+</merge>

@@ -18,10 +18,17 @@ public class BitmapLoader {
 
     private Resources resources;
     private Bitmap mPlaceHolderBitmap;
+    private int height = 100;
+    private int width = 100;
 
     public BitmapLoader(Resources res, int placeholder){
         this.resources = res;
         mPlaceHolderBitmap = BitmapFactory.decodeResource(resources,placeholder);
+    }
+
+    public void setLoadSizes(int w, int h){
+        this.width = w;
+        this.height = h;
     }
 
     public void loadBitmap(String filePath, ImageView imageView) {
@@ -129,7 +136,7 @@ public class BitmapLoader {
         @Override
         protected Bitmap doInBackground(String... params) {
             data = params[0];
-            return decodeSampledBitmapFromResource(data, 100, 100);
+            return decodeSampledBitmapFromResource(data, width, height);
         }
 
         // Once complete, see if ImageView is still around and set bitmap.
