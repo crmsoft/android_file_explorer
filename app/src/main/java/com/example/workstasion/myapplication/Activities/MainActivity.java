@@ -1,9 +1,12 @@
 package com.example.workstasion.myapplication.Activities;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -23,6 +26,7 @@ import com.example.workstasion.myapplication.Workers.ImageScanner;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
@@ -41,8 +45,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private int selectedLevel = 0;
     private MenuItem selectedItemCount;
     private MenuItem checkboxItem;
+    private MenuItem doneMenuItem;
     private boolean isCheckEnabled = true;
     private ProgressBar progressBar;
+    private int scroll = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +73,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         mGridView = (GridView) findViewById(R.id.gridView);
         mGridView.setAdapter(mAdapter);
         mGridView.setOnItemClickListener(this);
+        load();
+    }
 
+    private void load(){
         loader = new ImageScanner(path, new ImageScanner.ScannerEvents() {
             @Override
             public void loadDone() {
@@ -86,11 +95,27 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode){
+            case MY_PERMISSIONS_REQUEST_READ_CONTACTS : {
+                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    load();
+                }else{
+                    ActivityCompat.requestPermissions(MainActivity.this,
+                            new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                            MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+                }
+            } break;
+        }
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.default_menu, menu);
         selectedItemCount = menu.findItem(R.id.item_count);
         checkboxItem = menu.findItem(R.id.check);
+        doneMenuItem = menu.findItem(R.id.done);
         return true;
     }
 
@@ -102,6 +127,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             isCheckEnabled = false;
             ImageScanner.FoldStruct f = selectedFolder.get(0);
             selectedItemCount.setVisible(false);
+            doneMenuItem.setVisible(false);
             if(f != null){
                 f.selectedIndexes.clear();
                 mAdapterDetailed.notifyDataSetChanged();
@@ -120,6 +146,22 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     checkboxItem.setIcon(R.drawable.ic_check_box_outline_blank_white_24dp);
                 }
             } break;
+            case R.id.done : {
+                Intent results = new Intent();
+                Bundle bundle = new Bundle();
+                ImageScanner.FoldStruct f = selectedFolder.get(0);
+                if(f != null) {
+                    String[] res = new String[f.selectedIndexes.size()];
+                    int index = 0;
+                    for (Integer i:f.selectedIndexes){
+                        res[index] = f.fullPath[index++];
+                    }
+                    bundle.putStringArray("results",res);
+                }
+                results.putExtras(bundle);
+                setResult(Activity.RESULT_OK,results);
+                finish();
+            } break;
             default: {
                 if(selectedLevel == 0){
                     return super.onOptionsItemSelected(item);
@@ -129,6 +171,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     checkboxItem.setVisible(false);
                     setTitle(activityTitle);
                     mGridView.setAdapter(mAdapter);
+                    mGridView.setSelection(scroll);
                 }
             } break;
         } return false;
@@ -143,6 +186,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             selectedFolder.clear();
             f.selectedIndexes.clear();
             selectedFolder.add(f);
+            scroll = mGridView.getFirstVisiblePosition();
             mGridView.setAdapter(mAdapterDetailed);
             selectedLevel = 1;
             isCheckEnabled = false;
@@ -158,11 +202,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                         checkbox.setVisibility(View.VISIBLE);
                         f.selectedIndexes.add(position);
                         selectedItemCount.setTitle(f.selectedIndexes.size()+"");
+                        doneMenuItem.setVisible(true);
                         selectedItemCount.setVisible(true);
                     }else {
                         checkbox.setVisibility(View.GONE);
                         f.selectedIndexes.remove(Integer.valueOf(position));
                         if(f.selectedIndexes.size() == 0){
+                            doneMenuItem.setVisible(false);
                             selectedItemCount.setVisible(false);
                         }else{
                             selectedItemCount.setTitle(f.selectedIndexes.size()+"");
@@ -170,9 +216,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     }
                 else {
                     Bundle bundle = new Bundle();
-                    bundle.putStringArray("items",selectedFolder.get(0).fullPath);
-                    bundle.putStringArray("names",selectedFolder.get(0).filename);
+                    bundle.putStringArray("items",f.fullPath);
+                    bundle.putStringArray("names",f.filename);
                     bundle.putInt("start",position);
+                    bundle.putInt("total",f.counter);
                     startActivity(new Intent(MainActivity.this, ImageSlider.class).putExtras(bundle));
                 }
             }

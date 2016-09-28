@@ -13,4 +13,11 @@
           android:title="1"
           myapplication:showAsAction="always" />
 
+    <item android:id="@+id/done"
+        android:title="test"
+        android:orderInCategory="10"
+        android:visible="false"
+        myapplication:showAsAction="always"
+        android:icon="@drawable/ic_done_white_18dp" />
+
 </menu>

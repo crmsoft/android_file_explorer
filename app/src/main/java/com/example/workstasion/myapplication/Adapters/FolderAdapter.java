@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
@@ -51,7 +52,7 @@ public class FolderAdapter extends ArrayAdapter<ImageScanner.FoldStruct> {
         }
         ImageScanner.FoldStruct foldStruct = getItem(position);
         viewHolder.folderName.setText(foldStruct.folder);
-        viewHolder.folderRootName.setText(foldStruct.root);
+        viewHolder.folderRootName.setText("/"+foldStruct.root);
         viewHolder.itemCount.setText(foldStruct.counter+"");
         bitmapLoader.loadBitmap(foldStruct.fullPath[0],viewHolder.preview);
         return convertView;

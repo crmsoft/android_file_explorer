@@ -18,15 +18,20 @@
             android:layout_height="match_parent">
 
             <RelativeLayout
-                android:background="@android:color/black"
-                android:alpha="0.5"
                 android:id="@+id/checkbox"
                 android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
+                <ImageView
+                    android:alpha="0.4"
+                    android:background="@android:color/black"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent" />
+
                 <com.example.workstasion.myapplication.Views.SquareImageView
                     android:scaleType="center"
+                    android:backgroundTint="@android:color/white"
                     android:tint="@android:color/white"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"

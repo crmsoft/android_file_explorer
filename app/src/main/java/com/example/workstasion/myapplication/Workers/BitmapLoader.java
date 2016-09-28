@@ -3,9 +3,13 @@ package com.example.workstasion.myapplication.Workers;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.ExifInterface;
 import android.os.AsyncTask;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
 import java.lang.ref.WeakReference;
@@ -95,9 +99,26 @@ public class BitmapLoader {
         // Calculate inSampleSize
         options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
 
-        // Decode bitmap with inSampleSize set
         options.inJustDecodeBounds = false;
-        return BitmapFactory.decodeFile(filePath, options);
+
+        Bitmap btm = BitmapFactory.decodeFile(filePath,options);
+
+        try {
+            int rotation = exifToDegrees(new ExifInterface(filePath).getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL));
+            Matrix matrix = new Matrix();
+            if(rotation != 0){ matrix.postRotate(rotation); }
+            btm = Bitmap.createBitmap(btm, 0, 0, btm.getWidth(), btm.getHeight(), matrix, true);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        } return btm;
+    }
+
+    private static int exifToDegrees(int exifOrientation) {
+        switch (exifOrientation){
+            case ExifInterface.ORIENTATION_ROTATE_90 : return 90;
+            case ExifInterface.ORIENTATION_ROTATE_180 : return 180;
+            case ExifInterface.ORIENTATION_ROTATE_270 : return 270;
+        } return 0;
     }
 
     public static int calculateInSampleSize(
