@@ -10,8 +10,10 @@ import android.view.Display;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.LinearLayout;
 
 import com.example.workstasion.myapplication.R;
@@ -29,6 +31,7 @@ public class ImageSlider extends AppCompatActivity {
     private String[] items;
     private String[] names;
     private BitmapLoader loader;
+    private ActionBar actionBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,8 +39,9 @@ public class ImageSlider extends AppCompatActivity {
         setContentView(R.layout.activity_main_viewpager);
 
         Display display = getWindowManager().getDefaultDisplay();
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
 
-        ActionBar actionBar = getSupportActionBar();
+        actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setDefaultDisplayHomeAsUpEnabled(true);
@@ -129,6 +133,16 @@ public class ImageSlider extends AppCompatActivity {
         @Override
         public View instantiateItem(ViewGroup container, int position) {
             PhotoView photoView = new PhotoView(container.getContext());
+            photoView.setOnViewTapListener(new PhotoViewAttacher.OnViewTapListener() {
+                @Override
+                public void onViewTap(View view, float x, float y) {
+                    if (actionBar.isShowing()) {
+                        actionBar.hide();
+                    }else{
+                        actionBar.show();
+                    }
+                }
+            });
             loader.loadBitmap(items[position],photoView);
 
             // Now just add PhotoView to ViewPager and return it

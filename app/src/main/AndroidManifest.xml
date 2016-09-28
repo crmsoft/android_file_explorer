@@ -18,7 +18,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Activities.ImageSlider" android:theme="@style/SliderTheme">
+        <activity android:name=".Activities.ImageSlider" android:theme="@style/AppTheme.ActionBar.Transparent">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".Activities.MainActivity" />

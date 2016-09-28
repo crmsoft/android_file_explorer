@@ -26,7 +26,6 @@ import com.example.workstasion.myapplication.Workers.ImageScanner;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
