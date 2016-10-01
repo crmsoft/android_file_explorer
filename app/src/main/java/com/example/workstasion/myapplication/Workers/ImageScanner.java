@@ -26,6 +26,18 @@ public class ImageScanner {
         public void loadDone();
     }
 
+    public class FileInfo implements Comparable{
+        public String name;
+        public String  fullPath;
+        public long modifyDate;
+
+        @Override
+        public int compareTo(Object o){
+            long c = ((FileInfo)o).modifyDate;
+            return c < modifyDate ? -1 : c == modifyDate ? 0 : 1;
+        }
+    }
+
     public class FoldStruct{
 
         FoldStruct(String r,String f){
@@ -35,8 +47,7 @@ public class ImageScanner {
 
         public String root;
         public String folder;
-        public String[] fullPath;
-        public String[] filename;
+        public List<FileInfo> filesInfo = new ArrayList<>();
         public List<Integer> selectedIndexes = new ArrayList<>();
         public int counter = 0;
     }
@@ -124,13 +135,15 @@ public class ImageScanner {
                     foldStruct = findByRootName(root,folder);
                     if(foldStruct == null){
                         foldStruct = new FoldStruct(root,folder);
-                        foldStruct.filename = new String[size];
-                        foldStruct.fullPath = new String[size];
                         folding.add(foldStruct);
                     }
                 }
-                foldStruct.filename[foldStruct.counter] = fList[i];
-                foldStruct.fullPath[foldStruct.counter++] = curr.getAbsolutePath();
+                FileInfo info = new FileInfo();
+                info.fullPath = curr.getAbsolutePath();
+                info.modifyDate = curr.lastModified();
+                info.name = fList[i];
+                foldStruct.filesInfo.add(info);
+                foldStruct.counter++;
                 Log.i(TAG, parent + " deep: "+i);
             }
         }

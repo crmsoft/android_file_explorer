@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.widget.TextViewCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -16,8 +17,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.example.workstasion.myapplication.Adapters.FolderAdapter;
 import com.example.workstasion.myapplication.Adapters.ImageAdapter;
@@ -26,6 +29,8 @@ import com.example.workstasion.myapplication.Workers.ImageScanner;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class Explorer extends AppCompatActivity implements AdapterView.OnItemClickListener {
@@ -48,6 +53,7 @@ public class Explorer extends AppCompatActivity implements AdapterView.OnItemCli
     private boolean isCheckEnabled = true;
     private ProgressBar progressBar;
     private int scroll = 0;
+    private TextView modifyDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,7 +75,9 @@ public class Explorer extends AppCompatActivity implements AdapterView.OnItemCli
                 new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                 MY_PERMISSIONS_REQUEST_READ_CONTACTS);
 
+        modifyDate = (TextView)findViewById(R.id.modify_date);
         mGridView = (GridView) findViewById(R.id.gridView);
+        mAdapterDetailed.setDateView(modifyDate);
         mGridView.setAdapter(mAdapter);
         mGridView.setOnItemClickListener(this);
         load();
@@ -129,7 +137,18 @@ public class Explorer extends AppCompatActivity implements AdapterView.OnItemCli
             doneMenuItem.setVisible(false);
             if(f != null){
                 f.selectedIndexes.clear();
-                mAdapterDetailed.notifyDataSetChanged();
+                clearSelectionOfVisibleItems();
+            }
+        }
+    }
+
+    private void clearSelectionOfVisibleItems(){
+        int f = mGridView.getFirstVisiblePosition();
+        int l = mGridView.getLastVisiblePosition();
+        for(int i=(l-f); i>=0; i-- ){
+            View view = mGridView.getChildAt(i);
+            if(view != null){
+                view.findViewById(R.id.checkbox).setVisibility(View.GONE);
             }
         }
     }
@@ -153,7 +172,7 @@ public class Explorer extends AppCompatActivity implements AdapterView.OnItemCli
                     String[] res = new String[f.selectedIndexes.size()];
                     int index = 0;
                     for (Integer i:f.selectedIndexes){
-                        res[index] = f.fullPath[index++];
+                       // res[index] = f.fullPath[index++];
                     }
                     bundle.putStringArray("results",res);
                 }
@@ -181,6 +200,7 @@ public class Explorer extends AppCompatActivity implements AdapterView.OnItemCli
         ImageScanner.FoldStruct f;
         if(selectedLevel == 0) {
             f = folding.get(position);
+            Collections.sort(f.filesInfo);
             setTitle(f.folder);
             selectedFolder.clear();
             f.selectedIndexes.clear();
@@ -214,11 +234,21 @@ public class Explorer extends AppCompatActivity implements AdapterView.OnItemCli
                         }
                     }
                 else {
+                    String[] pathArray = new String[f.filesInfo.size()];
+                    String[] namesArray = new String[f.filesInfo.size()];
+                    int i = 0;
+
+                    for(ImageScanner.FileInfo info:f.filesInfo){
+                        pathArray[i] = info.fullPath;
+                        namesArray[i] = info.name;
+                        ++i;
+                    }
+
                     Bundle bundle = new Bundle();
-                    bundle.putStringArray("items",f.fullPath);
-                    bundle.putStringArray("names",f.filename);
+                    bundle.putStringArray("items",pathArray);
+                    bundle.putStringArray("names",namesArray);
                     bundle.putInt("start",position);
-                    bundle.putInt("total",f.counter);
+                    bundle.putInt("total",f.filesInfo.size());
                     startActivity(new Intent(Explorer.this, ImageSlider.class).putExtras(bundle));
                 }
             }

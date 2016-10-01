@@ -4,14 +4,13 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import com.example.workstasion.myapplication.Workers.BitmapLoader;
-import com.example.workstasion.myapplication.Workers.ImageScanner;
 import com.example.workstasion.myapplication.R;
 import com.example.workstasion.myapplication.Views.SquareImageView;
+import com.example.workstasion.myapplication.Workers.BitmapLoader;
+import com.example.workstasion.myapplication.Workers.ImageScanner;
 
 import java.util.List;
 
@@ -54,7 +53,7 @@ public class FolderAdapter extends ArrayAdapter<ImageScanner.FoldStruct> {
         viewHolder.folderName.setText(foldStruct.folder);
         viewHolder.folderRootName.setText("/"+foldStruct.root);
         viewHolder.itemCount.setText(foldStruct.counter+"");
-        bitmapLoader.loadBitmap(foldStruct.fullPath[0],viewHolder.preview);
+        bitmapLoader.loadBitmap(foldStruct.filesInfo.get(0).fullPath,viewHolder.preview);
         return convertView;
     }
 }

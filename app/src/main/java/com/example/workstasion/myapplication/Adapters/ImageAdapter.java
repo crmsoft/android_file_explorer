@@ -5,17 +5,16 @@ import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
-import com.example.workstasion.myapplication.Workers.BitmapLoader;
 import com.example.workstasion.myapplication.R;
 import com.example.workstasion.myapplication.Views.SquareImageView;
+import com.example.workstasion.myapplication.Workers.BitmapLoader;
 import com.example.workstasion.myapplication.Workers.ImageScanner;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 /**
@@ -26,12 +25,17 @@ public class ImageAdapter extends ArrayAdapter<ImageScanner.FoldStruct> {
     private BitmapLoader bitmapLoader;
     private List<ImageScanner.FoldStruct> item;
     private LayoutInflater inflater;
+    private TextView dateView;
 
     public ImageAdapter(Context context, List<ImageScanner.FoldStruct> objects) {
         super(context, R.layout.image_view_item, objects);
         bitmapLoader = new BitmapLoader(getContext().getResources(), R.drawable.placeholder);
         item = objects;
         inflater = LayoutInflater.from(getContext());
+    }
+
+    public void setDateView(TextView dateView) {
+        this.dateView = dateView;
     }
 
     @Override
@@ -62,10 +66,11 @@ public class ImageAdapter extends ArrayAdapter<ImageScanner.FoldStruct> {
             viewHolder = (ViewHolder)convertView.getTag();
         }
 
-
-        String curr = item.get(0).fullPath[position];
-        bitmapLoader.loadBitmap(curr,viewHolder.imageView);
-        if(item.get(0).selectedIndexes.contains(position)){
+        ImageScanner.FoldStruct f = item.get(0);
+        ImageScanner.FileInfo info = f.filesInfo.get(position);
+        bitmapLoader.loadBitmap(info.fullPath,viewHolder.imageView);
+        dateView.setText(getFormattedDate(info.modifyDate));
+        if(f.selectedIndexes.contains(position)){
             viewHolder.checkbox.setVisibility(View.VISIBLE);
         }else{
             viewHolder.checkbox.setVisibility(View.GONE);
@@ -73,4 +78,11 @@ public class ImageAdapter extends ArrayAdapter<ImageScanner.FoldStruct> {
 
         return convertView;
     }
+
+    private String getFormattedDate(long timestamp){
+        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+
+        return sdf.format(timestamp);
+    }
+
 }
