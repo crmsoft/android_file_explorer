@@ -28,7 +28,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
+public class Explorer extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
     private static final String TAG = "MAINACTIVITY";
     private static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 1453;
@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         mAdapterDetailed = new ImageAdapter(this,selectedFolder);
         progressBar = (ProgressBar)findViewById(R.id.load_indicator);
 
-        ActivityCompat.requestPermissions(MainActivity.this,
+        ActivityCompat.requestPermissions(Explorer.this,
                 new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                 MY_PERMISSIONS_REQUEST_READ_CONTACTS);
 
@@ -100,7 +100,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
                     load();
                 }else{
-                    ActivityCompat.requestPermissions(MainActivity.this,
+                    ActivityCompat.requestPermissions(Explorer.this,
                             new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                             MY_PERMISSIONS_REQUEST_READ_CONTACTS);
                 }
@@ -219,7 +219,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     bundle.putStringArray("names",f.filename);
                     bundle.putInt("start",position);
                     bundle.putInt("total",f.counter);
-                    startActivity(new Intent(MainActivity.this, ImageSlider.class).putExtras(bundle));
+                    startActivity(new Intent(Explorer.this, ImageSlider.class).putExtras(bundle));
                 }
             }
         }
