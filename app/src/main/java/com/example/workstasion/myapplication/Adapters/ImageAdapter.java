@@ -25,17 +25,12 @@ public class ImageAdapter extends ArrayAdapter<ImageScanner.FoldStruct> {
     private BitmapLoader bitmapLoader;
     private List<ImageScanner.FoldStruct> item;
     private LayoutInflater inflater;
-    private TextView dateView;
 
     public ImageAdapter(Context context, List<ImageScanner.FoldStruct> objects) {
         super(context, R.layout.image_view_item, objects);
         bitmapLoader = new BitmapLoader(getContext().getResources(), R.drawable.placeholder);
         item = objects;
         inflater = LayoutInflater.from(getContext());
-    }
-
-    public void setDateView(TextView dateView) {
-        this.dateView = dateView;
     }
 
     @Override
@@ -69,7 +64,6 @@ public class ImageAdapter extends ArrayAdapter<ImageScanner.FoldStruct> {
         ImageScanner.FoldStruct f = item.get(0);
         ImageScanner.FileInfo info = f.filesInfo.get(position);
         bitmapLoader.loadBitmap(info.fullPath,viewHolder.imageView);
-        dateView.setText(getFormattedDate(info.modifyDate));
         if(f.selectedIndexes.contains(position)){
             viewHolder.checkbox.setVisibility(View.VISIBLE);
         }else{

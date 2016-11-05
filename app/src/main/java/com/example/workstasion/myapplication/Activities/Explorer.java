@@ -53,7 +53,6 @@ public class Explorer extends AppCompatActivity implements AdapterView.OnItemCli
     private boolean isCheckEnabled = true;
     private ProgressBar progressBar;
     private int scroll = 0;
-    private TextView modifyDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,9 +74,7 @@ public class Explorer extends AppCompatActivity implements AdapterView.OnItemCli
                 new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                 MY_PERMISSIONS_REQUEST_READ_CONTACTS);
 
-        modifyDate = (TextView)findViewById(R.id.modify_date);
         mGridView = (GridView) findViewById(R.id.gridView);
-        mAdapterDetailed.setDateView(modifyDate);
         mGridView.setAdapter(mAdapter);
         mGridView.setOnItemClickListener(this);
         load();
