@@ -1,5 +1,6 @@
 package com.example.workstasion.myapplication.Activities;
 
+import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
@@ -27,7 +28,6 @@ public class ImageSlider extends AppCompatActivity {
 
     private static final String TAG = "IMAGESLIDER";
     private int position = 0;
-    private int total = 0;
     private String[] items;
     private String[] names;
     private BitmapLoader loader;
@@ -54,7 +54,6 @@ public class ImageSlider extends AppCompatActivity {
         items = bundle.getStringArray("items");
         names = bundle.getStringArray("names");
         position = bundle.getInt("start");
-        total = bundle.getInt("total");
         if(items == null || items.length == 0){
             finish();return;
         }
@@ -127,7 +126,7 @@ public class ImageSlider extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            return total;
+            return items.length;
         }
 
         @Override
@@ -143,6 +142,7 @@ public class ImageSlider extends AppCompatActivity {
                     }
                 }
             });
+            ImageSlider.this.position = position;
             loader.loadBitmap(items[position],photoView);
 
             // Now just add PhotoView to ViewPager and return it
@@ -172,6 +172,19 @@ public class ImageSlider extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        return super.onOptionsItemSelected(item);
+        int id = item.getItemId();
+
+        switch (id){
+            case R.id.share:{
+                Intent shareIntent = new Intent();
+                shareIntent.setAction(Intent.ACTION_SEND);
+                shareIntent.putExtra(Intent.EXTRA_STREAM, items[position]);
+                shareIntent.setType("image/*");
+                startActivity(shareIntent);
+            } break;
+            default:{
+                return super.onOptionsItemSelected(item);
+            }
+        } return true;
     }
 }

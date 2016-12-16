@@ -18,13 +18,17 @@ import com.example.workstasion.myapplication.R;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class FolderContent extends AppCompatActivity implements AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener{
 
+    private final String TAG = "FolderContent";
     private GridView gridView;
     private ProgressBar progressBar;
     private FolderContentAdapter adapter;
     private String[] items;
+    private List<Integer> selectedIndexes = new ArrayList<>();
+    private MenuItem removeSelectedBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +63,8 @@ public class FolderContent extends AppCompatActivity implements AdapterView.OnIt
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.slider_menu, menu);
+        inflater.inflate(R.menu.folder_content_menu, menu);
+        removeSelectedBtn = menu.findItem(R.id.item_rm_selected);
         return true;
     }
 
@@ -70,12 +75,24 @@ public class FolderContent extends AppCompatActivity implements AdapterView.OnIt
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Bundle bundle = new Bundle();
-        bundle.putStringArray("items",items);
-        bundle.putStringArray("names",items);
-        bundle.putInt("start",position);
-        bundle.putInt("total",items.length);
-        startActivity(new Intent(FolderContent.this, ImageSlider.class).putExtras(bundle));
+        if(selectedIndexes.size() > 0) {
+            RelativeLayout r = (RelativeLayout) view.findViewById(R.id.checkbox);
+            if (r != null) {
+                if(r.getVisibility() == View.VISIBLE){
+                    r.setVisibility(View.INVISIBLE );
+                    selectedIndexes.remove( selectedIndexes.indexOf( Integer.valueOf(position) ) );
+                }else{
+                    r.setVisibility(View.VISIBLE);
+                    selectedIndexes.add(Integer.valueOf(position));
+                } adapter.setSelectedItems( selectedIndexes );
+            }
+        }else {
+            Bundle bundle = new Bundle();
+            bundle.putStringArray("items", items);
+            bundle.putStringArray("names", items);
+            bundle.putInt("start", position);
+            startActivity(new Intent(FolderContent.this, ImageSlider.class).putExtras(bundle));
+        } removeSelectedBtn.setVisible( selectedIndexes.size() > 0 );
     }
 
     @Override
@@ -84,6 +101,9 @@ public class FolderContent extends AppCompatActivity implements AdapterView.OnIt
         RelativeLayout r = (RelativeLayout) view.findViewById(R.id.checkbox);
         if(r != null){
             r.setVisibility( View.VISIBLE );
+            selectedIndexes.add( Integer.valueOf(position) );
+            removeSelectedBtn.setVisible( true );
+            adapter.setSelectedItems( selectedIndexes );
             return true;
         }
 
