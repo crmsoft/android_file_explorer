@@ -9,7 +9,6 @@ import android.widget.TextView;
 
 import com.example.workstasion.myapplication.R;
 import com.example.workstasion.myapplication.Views.SquareImageView;
-import com.example.workstasion.myapplication.Workers.ImageScanner;
 import com.example.workstasion.myapplication.Workers.Loader;
 
 import java.util.List;

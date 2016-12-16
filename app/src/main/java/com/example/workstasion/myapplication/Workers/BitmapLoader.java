@@ -3,13 +3,9 @@ package com.example.workstasion.myapplication.Workers;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.media.ExifInterface;
 import android.os.AsyncTask;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
 import java.lang.ref.WeakReference;

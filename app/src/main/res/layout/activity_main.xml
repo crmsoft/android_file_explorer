@@ -5,7 +5,7 @@
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.workstasion.myapplication.Activities.Explorer">
+    tools:context="com.example.workstasion.myapplication.Activities.Explore">
 
     <GridView
         android:id="@+id/gridView"
@@ -13,17 +13,6 @@
         android:numColumns="2"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-
-    <com.getbase.floatingactionbutton.FloatingActionButton
-        android:id="@+id/multiple_actions"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginBottom="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginEnd="16dp" />
 
     <ProgressBar
         style="?android:attr/progressBarStyle"

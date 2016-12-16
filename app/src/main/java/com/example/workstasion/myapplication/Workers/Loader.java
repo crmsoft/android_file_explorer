@@ -6,9 +6,7 @@ import android.os.Build;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.lang.Runnable;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Created by WORKSTASION on 15.12.2016.
