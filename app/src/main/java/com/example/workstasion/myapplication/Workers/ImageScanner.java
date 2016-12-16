@@ -24,6 +24,7 @@ public class ImageScanner {
 
     public interface ScannerEvents{
         public void loadDone();
+        public void addPreview(String a,FoldStruct b);
     }
 
     public class FileInfo implements Comparable{
@@ -83,6 +84,13 @@ public class ImageScanner {
         } else {
             loadInBack.execute();
         }
+        if(startPath != null)
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    new deepThread(startPath,"root").start();
+                }
+            }).start();
     }
 
     private void process(){
@@ -101,8 +109,9 @@ public class ImageScanner {
         @Override
         protected Void doInBackground(Void... params) {
 
-            if(startPath != null)
-                deep(startPath,"root");
+
+            /*if(startPath != null)
+                deep(startPath,"root");*/
 
             return null;
         }
@@ -113,17 +122,95 @@ public class ImageScanner {
         }
     }
 
-    private void deep(File p, String parent ){
+    private String inPath = "";
+    private class deepThread extends Thread{
+
+        private File p;
+        String parent;
+
+        deepThread( File f, String r ){
+            p = f;
+            parent = r;
+        }
+
+        @Override
+        public void run() {
+
+            String[] fList = p.list(filter);
+            if(fList == null) return;
+            int size = fList.length;
+            for (int i = 0 ; i < size; i++){
+                final String current_path = fList[i];
+                final File curr = new File(p,current_path);
+                if(curr.isDirectory()){
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            new deepThread( curr,parent+"|"+current_path ).start();
+                        }
+                    }).start();
+                }else{
+                    String[] p = parent.split("\\|");
+                    if(checkAdd(p[p.length-1])){
+                        inPath += "|"+p[p.length-1];
+                        FileInfo info = new FileInfo();
+                        info.fullPath = curr.getAbsolutePath();
+                        info.modifyDate = curr.lastModified();
+                        info.name = current_path;
+                        FoldStruct _f = new FoldStruct(parent,parent);
+                        _f.counter = 1;
+                        _f.filesInfo.add(info);
+                        ImageScanner.this.scannerEvents.addPreview(parent, _f );
+                    }
+                }
+            }
+        }
+    }
+
+    private synchronized boolean checkAdd(String s){
+        Log.i(TAG, "checkAdd: "+inPath);
+        return !inPath.contains(s);
+    }
+
+    private void dirPreview(File p, final String parent){
+        String[] fList = p.list(filter);
+        if(fList == null) return;
+        int size = fList.length;
+        for (int i = 0 ; i < size; i++){
+            final String current_path = fList[i];
+            final File curr = new File(p,current_path);
+            if(curr.isDirectory()){
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        dirPreview(curr,parent+"|"+current_path);
+                    }
+                }).start();
+            }else{
+                Log.i(TAG, "dirPreview: "+current_path);
+
+            }
+        }
+    }
+
+    private void deep(File p, final String parent ){
         String[] fList = p.list(filter);
         if(fList == null) return;
         String root = null, folder = null;
         FoldStruct foldStruct = null;
-        int size = fList.length;
-        for (int i = 0 ; i < size; i++){
-            File curr = new File(p,fList[i]);
+        int size = fList.length - 1;
+        for (int i = size ; i >= 0; i--){
+            final String curr_path = fList[i];
+            final File curr = new File(p,curr_path);
             if(curr.isDirectory()){
-                deep(curr,parent+"|"+fList[i]);
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        deep(curr,parent+"|"+curr_path);
+                    }
+                }).start();
             }else{
+                boolean add = false;
                 if(parent.equals("root")) {
                     root = folder = "root";
                     foldStruct = new FoldStruct(root,folder);
@@ -134,6 +221,7 @@ public class ImageScanner {
                     folder = parts[parts.length-1];
                     foldStruct = findByRootName(root,folder);
                     if(foldStruct == null){
+                        add = true;
                         foldStruct = new FoldStruct(root,folder);
                         folding.add(foldStruct);
                     }
@@ -143,6 +231,12 @@ public class ImageScanner {
                 info.modifyDate = curr.lastModified();
                 info.name = fList[i];
                 foldStruct.filesInfo.add(info);
+                if(add){
+                    FoldStruct _f = new FoldStruct(root,root);
+                    _f.counter = 1;
+                    _f.filesInfo.add(info);
+                    ImageScanner.this.scannerEvents.addPreview(root, _f );
+                }
                 foldStruct.counter++;
                 Log.i(TAG, parent + " deep: "+i);
             }

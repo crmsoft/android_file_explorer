@@ -11,6 +11,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.TextViewCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -22,10 +23,12 @@ import android.widget.GridView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.example.workstasion.myapplication.Adapters.Folder;
 import com.example.workstasion.myapplication.Adapters.FolderAdapter;
 import com.example.workstasion.myapplication.Adapters.ImageAdapter;
 import com.example.workstasion.myapplication.R;
 import com.example.workstasion.myapplication.Workers.ImageScanner;
+import com.example.workstasion.myapplication.Workers.Loader;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -37,7 +40,7 @@ public class Explorer extends AppCompatActivity implements AdapterView.OnItemCli
 
     private static final String TAG = "MAINACTIVITY";
     private static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 1453;
-    private FolderAdapter mAdapter;
+    private Folder mAdapter;
     private ImageAdapter mAdapterDetailed;
     private List<ImageScanner.FoldStruct> selectedFolder = new ArrayList<>();
 
@@ -53,6 +56,9 @@ public class Explorer extends AppCompatActivity implements AdapterView.OnItemCli
     private boolean isCheckEnabled = true;
     private ProgressBar progressBar;
     private int scroll = 0;
+    ActionBar actionBar;
+
+    private List<Loader.DirectoryPreview> list = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,13 +66,13 @@ public class Explorer extends AppCompatActivity implements AdapterView.OnItemCli
         setContentView(R.layout.activity_main);
 
         setTitle(activityTitle);
-        ActionBar actionBar = getSupportActionBar();
+        actionBar = getSupportActionBar();
         if(actionBar != null){
             actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setDefaultDisplayHomeAsUpEnabled(true);
+            actionBar.setDefaultDisplayHomeAsUpEnabled(false);
         }
 
-        mAdapter = new FolderAdapter(this,folding);
+        mAdapter = new Folder(this,list);
         mAdapterDetailed = new ImageAdapter(this,selectedFolder);
         progressBar = (ProgressBar)findViewById(R.id.load_indicator);
 
@@ -77,15 +83,26 @@ public class Explorer extends AppCompatActivity implements AdapterView.OnItemCli
         mGridView = (GridView) findViewById(R.id.gridView);
         mGridView.setAdapter(mAdapter);
         mGridView.setOnItemClickListener(this);
-        load();
     }
 
     private void load(){
         loader = new ImageScanner(path, new ImageScanner.ScannerEvents() {
             @Override
             public void loadDone() {
-                folding.clear();
+                /*folding.clear();
                 folding.addAll(loader.get());
+                /*runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ((BaseAdapter)mGridView.getAdapter()).notifyDataSetChanged();
+                        progressBar.setVisibility(View.GONE);
+                    }
+                });*/
+            }
+
+            @Override
+            public void addPreview( String folder, ImageScanner.FoldStruct info ) {
+                folding.add(info);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -95,6 +112,7 @@ public class Explorer extends AppCompatActivity implements AdapterView.OnItemCli
                 });
             }
         });
+        folding.clear();
         loader.load();
     }
 
@@ -181,6 +199,7 @@ public class Explorer extends AppCompatActivity implements AdapterView.OnItemCli
                 if(selectedLevel == 0){
                     return super.onOptionsItemSelected(item);
                 }else{
+                    actionBar.setDefaultDisplayHomeAsUpEnabled(false);
                     selectedLevel = 0;
                     toggleSelectItem(false);
                     checkboxItem.setVisible(false);
@@ -193,14 +212,27 @@ public class Explorer extends AppCompatActivity implements AdapterView.OnItemCli
     }
 
     @Override
+    protected void onStart() {
+        //load();
+        super.onStart();
+    }
+
+    @Override
+    protected void onResume() {
+       // load();
+        super.onResume();
+        list.clear();
+    }
+
+    @Override
     public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
         ImageScanner.FoldStruct f;
         if(selectedLevel == 0) {
             f = folding.get(position);
             Collections.sort(f.filesInfo);
             setTitle(f.folder);
-            selectedFolder.clear();
             f.selectedIndexes.clear();
+            selectedFolder.clear();
             selectedFolder.add(f);
             scroll = mGridView.getFirstVisiblePosition();
             mGridView.setAdapter(mAdapterDetailed);
@@ -208,6 +240,7 @@ public class Explorer extends AppCompatActivity implements AdapterView.OnItemCli
             isCheckEnabled = false;
             checkboxItem.setIcon(R.drawable.ic_check_box_outline_blank_white_24dp);
             checkboxItem.setVisible(true);
+            actionBar.setDefaultDisplayHomeAsUpEnabled(true);
         }else{
             f = selectedFolder.get(0);
             if(f == null) return;
