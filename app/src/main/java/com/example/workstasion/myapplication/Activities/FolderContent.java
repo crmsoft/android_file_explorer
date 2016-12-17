@@ -34,6 +34,7 @@ public class FolderContent extends AppCompatActivity implements AdapterView.OnIt
     private List<Integer> selectedIndexes = new ArrayList<>();
     private MenuItem removeSelectedBtn;
     private int position;
+    private itemDeletionDone deletionDone = new itemDeletionDone();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,10 +72,20 @@ public class FolderContent extends AppCompatActivity implements AdapterView.OnIt
         gridView.setAdapter(adapter);
         gridView.setOnItemClickListener(this);
         gridView.setOnItemLongClickListener(this);
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
         IntentFilter filter = new IntentFilter();
         filter.addAction("delete_items_done");
-        registerReceiver(new itemDeletionDone(),filter);
+        registerReceiver(deletionDone, filter);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver( deletionDone );
     }
 
     @Override

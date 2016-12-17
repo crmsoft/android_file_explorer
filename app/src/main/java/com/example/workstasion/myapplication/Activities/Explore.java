@@ -59,6 +59,7 @@ public class Explore extends AppCompatActivity implements AdapterView.OnItemClic
 
         IntentFilter filter = new IntentFilter();
         filter.addAction("do_rm_files");
+        filter.addAction("do_rm_folder");
         registerReceiver(new requestDeleteItems(),filter);
     }
 
@@ -149,26 +150,30 @@ public class Explore extends AppCompatActivity implements AdapterView.OnItemClic
                 if(b != null){
                     String action = b.getString("result");
                     if(action.equals("remove")){
-                        Loader.DirectoryPreview d  = directoryPreviewList.get( b.getInt("position") );
-                        if(d != null){
-                            List<Integer> removeItems = new ArrayList<>();
-                            removeItems.add(Integer.valueOf(b.getInt("position")));
-                            String deleteAlso = "";
-                           for(Loader.DirectoryPreview preview : directoryPreviewList){
-                                if( !d.getName().equals(preview.getName()) && preview.getDirPath().contains( d.getName() ) ){
-                                    deleteAlso += ","+preview.getName();
-                                    removeItems.add(Integer.valueOf(directoryPreviewList.indexOf(preview)));
-                                }
-                            }
-                            Resources r = getResources();
-                            String ask = deleteAlso.length() == 0 ? r.getString( R.string.delete_dir, d.getName() ) : r.getString( R.string.delete_dir_and_sub, d.getName(), deleteAlso.substring( 1, deleteAlso.length() ) );
-                            confirmRemoveDirectory( ask, d.getName(), removeItems );
-                        }
+                        removeDirHelper(b.getInt("position"));
                     }
                 }
             }
         }
 
+    }
+
+    private void removeDirHelper(int position){
+        Loader.DirectoryPreview d  = directoryPreviewList.get( position );
+        if(d != null){
+            List<Integer> removeItems = new ArrayList<>();
+            removeItems.add(Integer.valueOf( position ));
+            String deleteAlso = "";
+            for(Loader.DirectoryPreview preview : directoryPreviewList){
+                if( !d.getName().equals(preview.getName()) && preview.getDirPath().contains( d.getName() ) ){
+                    deleteAlso += ","+preview.getName();
+                    removeItems.add(Integer.valueOf(directoryPreviewList.indexOf(preview)));
+                }
+            }
+            Resources r = getResources();
+            String ask = deleteAlso.length() == 0 ? r.getString( R.string.delete_dir, d.getName() ) : r.getString( R.string.delete_dir_and_sub, d.getName(), deleteAlso.substring( 1, deleteAlso.length() ) );
+            confirmRemoveDirectory( ask, d.getName(), removeItems );
+        }
     }
 
     private void confirmRemoveDirectory(String msg, final String target, final List<Integer> r_indexes){
@@ -203,8 +208,8 @@ public class Explore extends AppCompatActivity implements AdapterView.OnItemClic
         @Override
         public void onReceive(Context context, Intent intent) {
             if(intent == null)return;
+            Bundle b = intent.getExtras();
             if(intent.getAction().equals("do_rm_files")) {
-                Bundle b = intent.getExtras();
                 if(b != null) {
                     ArrayList<Integer> indexes = b.getIntegerArrayList("items");
                     ArrayList<Integer> oks = new ArrayList<>();
@@ -231,6 +236,11 @@ public class Explore extends AppCompatActivity implements AdapterView.OnItemClic
                         i.putExtras(response);
                         sendBroadcast(i);
                     }
+                }
+            }else if( intent.getAction().equals("do_rm_folder") ){
+                if(b != null) {
+                    int position = b.getInt("position");
+                    removeDirHelper(position);
                 }
             }
         }

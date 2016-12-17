@@ -66,7 +66,7 @@
                                 android:layout_width="wrap_content"
                                 android:src="@drawable/ic_delete_white_18dp"
                                 android:layout_height="15dp"
-                                android:id="@+id/folder_tm_btn"
+                                android:id="@+id/folder_rm_btn"
                                 android:layout_centerVertical="true"
                                 android:layout_alignParentLeft="false"
                                 android:layout_alignParentStart="false"
