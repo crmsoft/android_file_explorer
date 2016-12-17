@@ -48,6 +48,7 @@ public class Loader implements Runnable {
         private Long lastModified;
         private int count = 0;
         private String[] items;
+        private String dirPath;
 
         public String getName() {
             return name;
@@ -87,6 +88,14 @@ public class Loader implements Runnable {
 
         public void setItems(String[] items) {
             this.items = items;
+        }
+
+        public String getDirPath() {
+            return dirPath;
+        }
+
+        public void setDirPath(String dirPath) {
+            this.dirPath = dirPath;
         }
 
         private class LoadInBack extends AsyncTask<String, Void, Bitmap> {
@@ -129,11 +138,11 @@ public class Loader implements Runnable {
 
     @Override
     public void run() {
-        this.doWork( this.startPoint, this.startPoint.getName() );
+        this.doWork( this.startPoint, this.startPoint.getName(), this.startPoint.getName() );
         this.listener.done();
     }
 
-    private void doWork(File d, String parent){
+    private void doWork(File d, String parent, String tree){
 
         DirectoryPreview directoryPreview = new DirectoryPreview();
         String[] fList = d.list(filter);
@@ -143,7 +152,7 @@ public class Loader implements Runnable {
         for (int i = size - 1; i >= 0; i--){
             final File curr = new File(d,fList[i]);
             if(curr.isDirectory()){
-                doWork(curr, d.getName());
+                doWork(curr, d.getName(), parent+"|"+d.getName());
             } else {
                 tmp[ directoryPreview.getCount() ] = curr.getPath();
                 if(directoryPreview.name == null) {
@@ -151,6 +160,7 @@ public class Loader implements Runnable {
                     directoryPreview.setPreview(curr.getPath());
                     directoryPreview.setUpDirName( parent );
                     directoryPreview.setLastModified( d.lastModified() );
+                    directoryPreview.setDirPath( d.getPath() );
                 } directoryPreview.increment();
             }
         }

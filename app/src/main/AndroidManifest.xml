@@ -13,6 +13,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".Activities.Explore"
+            android:theme="@style/AppTheme"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

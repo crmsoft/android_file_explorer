@@ -2,4 +2,7 @@
     <string name="app_name">File Explorer</string>
     <string name="share">Share</string>
     <string name="delete">Delete</string>
+    <string name="delete_dir">Delete %1$s ?</string>
+    <string name="delete_dir_and_sub">If you delete %1$s directory, the sub directories %2$s will be lost too. Delete %1$s anyway ?</string>
+    <string name="delete_progress">Please wait deleting %1$s</string>
 </resources>

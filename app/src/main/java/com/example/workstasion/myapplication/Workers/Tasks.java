@@ -4,12 +4,30 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
+import android.provider.MediaStore;
+
+import java.io.File;
+import java.io.RandomAccessFile;
+import java.security.SecureRandom;
 
 /**
  * Created by WORKSTASION on 15.12.2016.
  */
 
 public class Tasks {
+
+
+    public static boolean rmDir( String dirPath ){
+
+        File file = new File(dirPath);
+        if(file.exists()){
+            if(file.isDirectory())
+                for(File child : file.listFiles())
+                    rmDir(child.getPath());
+
+            return file.delete();
+        }return false;
+    }
 
     public static Bitmap decodeSampledBitmapFromResource(String filePath,
                                                          int reqWidth, int reqHeight) {

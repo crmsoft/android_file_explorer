@@ -29,27 +29,33 @@ public class FolderContent extends AppCompatActivity implements AdapterView.OnIt
     private String[] items;
     private List<Integer> selectedIndexes = new ArrayList<>();
     private MenuItem removeSelectedBtn;
+    private int position;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        ActionBar actionBar = getSupportActionBar();
+        if(actionBar != null){
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDefaultDisplayHomeAsUpEnabled(true);
+        }
 
-        Bundle b = getIntent().getExtras();
+        Intent i = getIntent();
 
+        if(i == null)
+            return;
+
+        Bundle b = i.getExtras();
         items = b.getStringArray("items");
+        position = b.getInt("position");
 
         if(items == null || items.length == 0) {
             finish();
             return;
         }
 
-        ActionBar actionBar = getSupportActionBar();
-        if(actionBar != null){
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setDefaultDisplayHomeAsUpEnabled(true);
-        }
         gridView = (GridView)findViewById(R.id.gridView);
         progressBar = (ProgressBar)findViewById(R.id.load_indicator);
         progressBar.setVisibility(View.INVISIBLE);
@@ -70,7 +76,21 @@ public class FolderContent extends AppCompatActivity implements AdapterView.OnIt
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        return super.onOptionsItemSelected(item);
+        int id = item.getItemId();
+        switch (id){
+            case R.id.rm_folder:{
+                Intent returnIntent = new Intent();
+                Bundle b = new Bundle();
+                b.putString("result","remove");
+                b.putInt("position",position);
+                returnIntent.putExtras(b);
+                setResult(RESULT_OK,returnIntent);
+                finish();
+            } break;
+            default: {
+                return super.onOptionsItemSelected(item);
+            }
+        } return true;
     }
 
     @Override
