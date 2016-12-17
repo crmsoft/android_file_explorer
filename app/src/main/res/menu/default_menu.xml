@@ -1,23 +1,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:myapplication="http://schemas.android.com/apk/res-auto">
 
-    <item android:id="@+id/check"
+    <item android:id="@+id/reload"
         android:title="test"
         android:orderInCategory="10"
-        android:visible="false"
         myapplication:showAsAction="always"
-        android:icon="@drawable/ic_check_box_outline_blank_white_24dp" />
-
-    <item android:id="@+id/item_count"
-            android:visible="false"
-          android:title="1"
-          myapplication:showAsAction="always" />
-
-    <item android:id="@+id/done"
-        android:title="test"
-        android:orderInCategory="10"
-        android:visible="false"
-        myapplication:showAsAction="always"
-        android:icon="@drawable/ic_done_white_18dp" />
+        android:icon="@drawable/ic_refresh_white_24dp" />
 
 </menu>

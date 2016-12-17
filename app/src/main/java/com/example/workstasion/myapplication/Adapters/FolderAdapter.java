@@ -17,12 +17,12 @@ import java.util.List;
  * Created by WORKSTASION on 15.12.2016.
  */
 
-public class Folder extends ArrayAdapter<Loader.DirectoryPreview> {
+public class FolderAdapter extends ArrayAdapter<Loader.DirectoryPreview> {
 
     private LayoutInflater inflater;
     private ViewHolder viewHolder;
 
-    public Folder(Context context, List<Loader.DirectoryPreview> list) {
+    public FolderAdapter(Context context, List<Loader.DirectoryPreview> list) {
         super(context, R.layout.folder_struct_item, list);
         inflater =  LayoutInflater.from(getContext());
     }

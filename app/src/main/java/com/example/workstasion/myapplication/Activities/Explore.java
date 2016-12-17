@@ -1,22 +1,27 @@
 package com.example.workstasion.myapplication.Activities;
 
-import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ContextThemeWrapper;
-import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.example.workstasion.myapplication.Adapters.Folder;
+import com.example.workstasion.myapplication.Adapters.FolderAdapter;
 import com.example.workstasion.myapplication.R;
 import com.example.workstasion.myapplication.Workers.DirectoryComparator;
 import com.example.workstasion.myapplication.Workers.Loader;
@@ -24,19 +29,19 @@ import com.example.workstasion.myapplication.Workers.Tasks;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 public class Explore extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
     private List<Loader.DirectoryPreview> directoryPreviewList = new ArrayList<>();
-    private Folder directoryAdapter;
+    private FolderAdapter directoryAdapter;
     private GridView gridView;
     private File path = new File(Environment.getExternalStorageDirectory() + "");
     private ProgressBar progressBar;
     private DirectoryComparator comparator = new DirectoryComparator();
     private final int foldListActivity = 111;
+    private ImageView rmBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,12 +51,15 @@ public class Explore extends AppCompatActivity implements AdapterView.OnItemClic
         gridView = (GridView)findViewById(R.id.gridView);
         progressBar = (ProgressBar)findViewById(R.id.load_indicator);
 
-        directoryAdapter = new Folder( this, directoryPreviewList );
+        directoryAdapter = new FolderAdapter( this, directoryPreviewList );
 
         gridView = (GridView)findViewById(R.id.gridView);
         gridView.setAdapter( directoryAdapter );
         gridView.setOnItemClickListener(this);
 
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("do_rm_files");
+        registerReceiver(new requestDeleteItems(),filter);
     }
 
     @Override
@@ -82,6 +90,53 @@ public class Explore extends AppCompatActivity implements AdapterView.OnItemClic
                 }
             })).start();
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.default_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        switch (id){
+            case R.id.reload :{
+                directoryPreviewList.clear();
+                if (progressBar.isShown()) {
+                    return false;
+                }
+                progressBar.setVisibility(View.VISIBLE);
+                new Thread(new Loader(path, new Loader.Communicate() {
+                    @Override
+                    public void newDir(Loader.DirectoryPreview preview) {
+                        directoryPreviewList.add(preview);
+                        Collections.sort(directoryPreviewList, comparator);
+                        Explore.this.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                directoryAdapter.notifyDataSetChanged();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void done( ) {
+                        Explore.this.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                progressBar.setVisibility(View.INVISIBLE);
+                            }
+                        });
+                    }
+                })).start();
+            }break;
+            default:{
+                return super.onOptionsItemSelected(item);
+            }
+        } return true;
     }
 
     @Override
@@ -143,11 +198,50 @@ public class Explore extends AppCompatActivity implements AdapterView.OnItemClic
                 .setNegativeButton("No", dialogClickListener).show();
     }
 
+    class requestDeleteItems extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent == null)return;
+            if(intent.getAction().equals("do_rm_files")) {
+                Bundle b = intent.getExtras();
+                if(b != null) {
+                    ArrayList<Integer> indexes = b.getIntegerArrayList("items");
+                    ArrayList<Integer> oks = new ArrayList<>();
+                    int pos = b.getInt("position");
+                    Loader.DirectoryPreview d = directoryPreviewList.get(pos);
+                    if(d != null) {
+                        Collections.sort(indexes, Collections.reverseOrder());
+                        for(Integer i : indexes){
+                            if (Tasks.rmDir(d.getItems()[i])) {
+                                oks.add(i);
+                            }
+                        }
+                        d.setItems( Tasks.removeArrayElements( d.getItems(), oks ) );
+                        d.setItemNames( Tasks.removeArrayElements( d.getItemNames(), oks ) );
+                        directoryPreviewList.remove(d);
+                        if(d.getItems().length > 0 ) {
+                            d.setPreview(d.getItems()[0]);
+                        }
+                        // notify
+                        Intent i = new Intent("delete_items_done");
+                        Bundle response = new Bundle();
+                        response.putStringArray( "items", d.getItems() );
+                        response.putStringArray( "names", d.getItemNames() );
+                        i.putExtras(response);
+                        sendBroadcast(i);
+                    }
+                }
+            }
+        }
+    }
+
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Loader.DirectoryPreview pr = directoryPreviewList.get( position );
         Bundle b = new Bundle();
         b.putStringArray( "items", pr.getItems() );
+        b.putStringArray( "names", pr.getItemNames() );
         b.putInt("position",position);
         Intent i = new Intent(Explore.this,FolderContent.class);
         i.putExtras(b);

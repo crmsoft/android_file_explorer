@@ -1,6 +1,9 @@
 package com.example.workstasion.myapplication.Activities;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -26,7 +29,8 @@ public class FolderContent extends AppCompatActivity implements AdapterView.OnIt
     private GridView gridView;
     private ProgressBar progressBar;
     private FolderContentAdapter adapter;
-    private String[] items;
+    private ArrayList<String> items;
+    private ArrayList<String> names;
     private List<Integer> selectedIndexes = new ArrayList<>();
     private MenuItem removeSelectedBtn;
     private int position;
@@ -48,22 +52,29 @@ public class FolderContent extends AppCompatActivity implements AdapterView.OnIt
             return;
 
         Bundle b = i.getExtras();
-        items = b.getStringArray("items");
+        String[] tmp = b.getStringArray("items");
+        String[] tmpNames = b.getStringArray("names");
         position = b.getInt("position");
 
-        if(items == null || items.length == 0) {
+        if(tmp == null || tmp.length == 0) {
             finish();
             return;
         }
 
+        items = new ArrayList<String>( Arrays.asList(tmp));
+        names = new ArrayList<String>( Arrays.asList(tmpNames));
         gridView = (GridView)findViewById(R.id.gridView);
         progressBar = (ProgressBar)findViewById(R.id.load_indicator);
         progressBar.setVisibility(View.INVISIBLE);
 
-        adapter = new FolderContentAdapter(this, new ArrayList<String>(Arrays.asList(items)));
+        adapter = new FolderContentAdapter(this, items);
         gridView.setAdapter(adapter);
         gridView.setOnItemClickListener(this);
         gridView.setOnItemLongClickListener(this);
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("delete_items_done");
+        registerReceiver(new itemDeletionDone(),filter);
     }
 
     @Override
@@ -87,10 +98,38 @@ public class FolderContent extends AppCompatActivity implements AdapterView.OnIt
                 setResult(RESULT_OK,returnIntent);
                 finish();
             } break;
+            case R.id.item_rm_selected:{
+                Intent i = new Intent("do_rm_files");
+                Bundle b = new Bundle();
+                b.putIntegerArrayList("items",new ArrayList<Integer>(selectedIndexes));
+                b.putInt("position",position);
+                i.putExtras(b);
+                sendBroadcast(i);
+            }
             default: {
                 return super.onOptionsItemSelected(item);
             }
         } return true;
+    }
+
+    class itemDeletionDone extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent == null)return;
+            if(intent.getAction().equals("delete_items_done")){
+                Bundle b = intent.getExtras();
+                if(b != null){
+                    selectedIndexes.clear();
+                    adapter.setSelectedItems(selectedIndexes);
+                    items.clear();
+                    names.clear();
+                    items.addAll( new ArrayList<String>( Arrays.asList( b.getStringArray("items") ) ));
+                    names.addAll( new ArrayList<String>( Arrays.asList( b.getStringArray("names") ) ));
+                    adapter.notifyDataSetChanged();
+                }
+            }
+        }
     }
 
     @Override
@@ -108,8 +147,8 @@ public class FolderContent extends AppCompatActivity implements AdapterView.OnIt
             }
         }else {
             Bundle bundle = new Bundle();
-            bundle.putStringArray("items", items);
-            bundle.putStringArray("names", items);
+            bundle.putStringArray("items", items.toArray(new String[items.size()]));
+            bundle.putStringArray("names", names.toArray(new String[names.size()]));
             bundle.putInt("start", position);
             startActivity(new Intent(FolderContent.this, ImageSlider.class).putExtras(bundle));
         } removeSelectedBtn.setVisible( selectedIndexes.size() > 0 );

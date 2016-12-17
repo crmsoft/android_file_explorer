@@ -48,6 +48,7 @@ public class Loader implements Runnable {
         private Long lastModified;
         private int count = 0;
         private String[] items;
+        private String[] itemNames;
         private String dirPath;
 
         public String getName() {
@@ -96,6 +97,18 @@ public class Loader implements Runnable {
 
         public void setDirPath(String dirPath) {
             this.dirPath = dirPath;
+        }
+
+        public String[] getItemNames() {
+            return itemNames;
+        }
+
+        public void setItemNames(String[] i){
+            this.itemNames = i;
+        }
+
+        public void addItemNames(String name, int index) {
+            this.itemNames[index] = name;
         }
 
         private class LoadInBack extends AsyncTask<String, Void, Bitmap> {
@@ -156,12 +169,15 @@ public class Loader implements Runnable {
             } else {
                 tmp[ directoryPreview.getCount() ] = curr.getPath();
                 if(directoryPreview.name == null) {
+                    directoryPreview.itemNames = new String[size];
                     directoryPreview.setName(d.getName());
                     directoryPreview.setPreview(curr.getPath());
                     directoryPreview.setUpDirName( parent );
                     directoryPreview.setLastModified( d.lastModified() );
                     directoryPreview.setDirPath( d.getPath() );
-                } directoryPreview.increment();
+                }
+                directoryPreview.addItemNames( curr.getName(), directoryPreview.getCount() );
+                directoryPreview.increment();
             }
         }
 

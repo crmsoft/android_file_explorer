@@ -1,9 +1,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:myapplication="http://schemas.android.com/apk/res-auto">
 
-    <item android:id="@+id/remove_item"
-        android:title="@string/delete" />
-
     <item android:id="@+id/share"
         android:title="@string/share" />
 

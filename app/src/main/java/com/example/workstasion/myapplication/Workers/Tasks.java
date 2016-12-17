@@ -4,11 +4,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
-import android.provider.MediaStore;
 
 import java.io.File;
-import java.io.RandomAccessFile;
-import java.security.SecureRandom;
+import java.util.List;
 
 /**
  * Created by WORKSTASION on 15.12.2016.
@@ -16,6 +14,17 @@ import java.security.SecureRandom;
 
 public class Tasks {
 
+
+    public static String[] removeArrayElements(String[] target, List<Integer> indexes){
+        if(target.length == 0) return target;
+        String[] copy = new String[ target.length - indexes.size() ];
+        int count = 0;
+        for (int i = 0; i < target.length; i++){
+            if(!indexes.contains( Integer.valueOf(i) )){
+                copy[ count++ ] = target[i];
+            }
+        } return copy;
+    }
 
     public static boolean rmDir( String dirPath ){
 
