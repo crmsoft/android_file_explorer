@@ -55,12 +55,16 @@ public class FolderContent extends AppCompatActivity implements AdapterView.OnIt
         Bundle b = i.getExtras();
         String[] tmp = b.getStringArray("items");
         String[] tmpNames = b.getStringArray("names");
+        String name = b.getString("name");
         position = b.getInt("position");
 
         if(tmp == null || tmp.length == 0) {
             finish();
             return;
         }
+
+        if(name != null)
+            this.setTitle(name);
 
         items = new ArrayList<String>( Arrays.asList(tmp));
         names = new ArrayList<String>( Arrays.asList(tmpNames));

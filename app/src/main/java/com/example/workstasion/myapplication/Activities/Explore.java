@@ -263,6 +263,7 @@ public class Explore extends AppCompatActivity implements AdapterView.OnItemClic
         Bundle b = new Bundle();
         b.putStringArray( "items", pr.getItems() );
         b.putStringArray( "names", pr.getItemNames() );
+        b.putString( "name", pr.getName() );
         b.putInt("position",position);
         Intent i = new Intent(Explore.this,FolderContent.class);
         i.putExtras(b);
