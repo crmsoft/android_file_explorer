@@ -1,13 +1,17 @@
 package com.example.workstasion.myapplication.Activities;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ContextThemeWrapper;
@@ -61,35 +65,38 @@ public class Explore extends AppCompatActivity implements AdapterView.OnItemClic
         filter.addAction("do_rm_files");
         filter.addAction("do_rm_folder");
         registerReceiver(new requestDeleteItems(),filter);
+
+        // permissions
+      if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    1);
+      }
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case 1: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    load();
+                }else{
+                    finish();
+                }
+            }
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         if(directoryPreviewList.size() == 0){
-            new Thread(new Loader(path, new Loader.Communicate() {
-                @Override
-                public void newDir(Loader.DirectoryPreview preview) {
-                    directoryPreviewList.add(preview);
-                    Collections.sort(directoryPreviewList, comparator);
-                    Explore.this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            directoryAdapter.notifyDataSetChanged();
-                        }
-                    });
-                }
-
-                @Override
-                public void done( ) {
-                    Explore.this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            progressBar.setVisibility(View.INVISIBLE);
-                        }
-                    });
-                }
-            })).start();
+            load();
         }
     }
 
@@ -110,34 +117,38 @@ public class Explore extends AppCompatActivity implements AdapterView.OnItemClic
                     return false;
                 }
                 progressBar.setVisibility(View.VISIBLE);
-                new Thread(new Loader(path, new Loader.Communicate() {
-                    @Override
-                    public void newDir(Loader.DirectoryPreview preview) {
-                        directoryPreviewList.add(preview);
-                        Collections.sort(directoryPreviewList, comparator);
-                        Explore.this.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                directoryAdapter.notifyDataSetChanged();
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void done( ) {
-                        Explore.this.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                progressBar.setVisibility(View.INVISIBLE);
-                            }
-                        });
-                    }
-                })).start();
+                load();
             }break;
             default:{
                 return super.onOptionsItemSelected(item);
             }
         } return true;
+    }
+
+    private void load() {
+        new Thread(new Loader(path, new Loader.Communicate() {
+            @Override
+            public void newDir(Loader.DirectoryPreview preview) {
+                directoryPreviewList.add(preview);
+                Collections.sort(directoryPreviewList, comparator);
+                Explore.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        directoryAdapter.notifyDataSetChanged();
+                    }
+                });
+            }
+
+            @Override
+            public void done( ) {
+                Explore.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        progressBar.setVisibility(View.INVISIBLE);
+                    }
+                });
+            }
+        })).start();
     }
 
     @Override
